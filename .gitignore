@@ -1,0 +1,36 @@
+# 原始数据文件夹
+一分一段表/
+录取统计/
+批次线与参考/
+招生计划/
+艺术体育数据/
+新数据/
+
+# 处理后数据
+processed/
+河南_*.json
+河南一分一段表_*.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 临时/调试脚本
+_test_*.py
+_check_*.py
+_debug_*.py
+_diagnose_*.py
+_verify_*.py
+_analyze_*.py
+_try_*.py
+_*.py
+_*.png
+
+# IDE
+.vscode/
+.idea/
+
+# 系统
+.DS_Store
+Thumbs.db

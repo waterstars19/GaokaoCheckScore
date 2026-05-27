@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>河南高考志愿推荐系统</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f5f7fa; color: #1a1a2e; }
+
+.header { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); color: white; padding: 24px 0; text-align: center; }
+.header h1 { font-size: 24px; letter-spacing: 2px; }
+.header p { font-size: 13px; color: #a8b2d1; margin-top: 4px; }
+
+.container { max-width: 980px; margin: 0 auto; padding: 16px; }
+
+/* ====== Tab ====== */
+.tab-bar { display: flex; gap: 0; background: white; border-radius: 14px 14px 0 0; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 0; }
+.tab-btn { flex: 1; padding: 12px; text-align: center; font-size: 15px; font-weight: 500; cursor: pointer; border: none; background: #f8f9fb; color: #888; transition: all .2s; border-bottom: 3px solid transparent; }
+.tab-btn.active { background: white; color: #0f3460; border-bottom-color: #0f3460; font-weight: 700; }
+.tab-btn:hover:not(.active) { background: #eef0f4; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ====== Query Box (shared) ====== */
+.query-box { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 14px; }
+.query-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-bottom: 10px; }
+.query-row2 { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
+.query-field { flex: 1; min-width: 100px; }
+.query-field label { display: block; font-size: 11px; color: #888; margin-bottom: 3px; font-weight: 500; }
+.query-field select, .query-field input { width: 100%; padding: 8px 10px; border: 1.5px solid #e0e3eb; border-radius: 8px; font-size: 14px; background: #fafbfc; }
+.query-field select:focus, .query-field input:focus { border-color: #0f3460; outline: none; background: white; }
+.btn-query { padding: 8px 24px; background: #0f3460; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; white-space: nowrap; height: 36px; }
+.btn-query:hover { background: #1a4a7a; }
+.btn-query:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ====== Results ====== */
+.result-box { display: none; }
+.result-box.show { display: block; }
+
+.summary-card { background: linear-gradient(135deg, #0f3460, #1a4a7a); color: white; border-radius: 14px; padding: 18px; margin-bottom: 14px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+.summary-left { display: flex; gap: 18px; flex-wrap: wrap; }
+.summary-item { }
+.summary-item .val { font-size: 26px; font-weight: 700; }
+.summary-item .lbl { font-size: 12px; color: #a8c4e8; }
+.summary-right { display: flex; gap: 10px; }
+.tier-badge { padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+.tier-badge.chong { background: #fff0f0; color: #d4380d; }
+.tier-badge.wen { background: #e6f4ff; color: #0958d9; }
+.tier-badge.bao { background: #f0fff0; color: #389e0d; }
+
+.isotonic-box { background: white; border-radius: 12px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 14px; }
+.isotonic-box h3 { font-size: 13px; color: #555; margin-bottom: 8px; }
+.isotonic-grid { display: flex; gap: 6px; flex-wrap: wrap; }
+.isotonic-tag { background: #f0f4ff; border: 1px solid #d6e4ff; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #0f3460; }
+
+.section { margin-bottom: 18px; }
+.section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.section-header h2 { font-size: 17px; font-weight: 700; }
+.section-header .count-badge { font-size: 12px; color: #999; font-weight: 400; }
+
+
+/* ====== Professional Tags ====== */
+.tags-row { display: inline-flex; gap: 3px; flex-wrap: nowrap; }
+.tag-item { background: #eef2f8; color: #555; font-size: 11px; padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
+.section-body { background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); overflow: hidden; }
+
+.item { display: flex; align-items: center; padding: 8px 14px; border-bottom: 1px solid #f0f2f5; gap: 6px; }
+.item:last-child { border-bottom: none; }
+.item:hover { background: #fafbfc; }
+.item .idx { width: 22px; font-size: 11px; color: #bbb; text-align: center; font-weight: 500; flex-shrink: 0; }
+.item .tier-tag { padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 600; min-width: 28px; text-align: center; flex-shrink: 0; }
+.tier-tag.chong { background: #fff0f0; color: #d4380d; }
+.tier-tag.wen { background: #e6f4ff; color: #0958d9; }
+.tier-tag.bao { background: #f0fff0; color: #389e0d; }
+.item .prov-tag { font-size: 11px; color: #aaa; flex-shrink: 0; }
+.item .name { font-size: 13px; font-weight: 500; flex-shrink: 0; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .major-info { font-size: 12px; color: #888; margin-left: 4px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .subj-req { font-size: 10px; color: #0f3460; background: #eef4fb; border-radius: 3px; padding: 0 5px; flex-shrink: 0; }
+.item .prob { font-size: 14px; font-weight: 700; min-width: 38px; text-align: right; flex-shrink: 0; }
+
+.loading { display: none; text-align: center; padding: 40px; }
+.loading.show { display: block; }
+.spinner { width: 30px; height: 30px; border: 3px solid #e0e3eb; border-top-color: #0f3460; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-msg { display: none; background: #fff2f0; border: 1px solid #ffccc7; border-radius: 8px; padding: 10px 14px; color: #cf1322; font-size: 13px; margin-bottom: 14px; }
+.error-msg.show { display: block; }
+
+/* ====== Algorithm Tab ====== */
+.algo-box { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 14px; }
+.algo-box h2 { font-size: 20px; color: #0f3460; margin-bottom: 14px; }
+.algo-box h3 { font-size: 16px; color: #1a1a2e; margin: 22px 0 8px; padding-left: 0; border-left: 4px solid #0f3460; padding-left: 12px; }
+.algo-box p, .algo-box li { font-size: 14px; line-height: 1.8; color: #444; }
+.algo-box ul { padding-left: 20px; margin: 6px 0; }
+.algo-box .formula { background: #f0f4ff; border: 1px solid #d6e4ff; border-radius: 8px; padding: 14px 18px; margin: 10px 0; font-size: 15px; text-align: center; font-weight: 500; font-family: 'Consolas', 'Courier New', monospace; }
+.algo-box .formula .hl { color: #d4380d; }
+.algo-box .formula .hl2 { color: #0958d9; }
+.algo-box .note { background: #fffbe6; border: 1px solid #ffe58f; border-radius: 6px; padding: 10px 14px; font-size: 13px; margin: 10px 0; }
+.algo-box table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+.algo-box td, .algo-box th { border: 1px solid #e0e3eb; padding: 8px 12px; font-size: 13px; }
+.algo-box th { background: #f0f4ff; font-weight: 600; }
+
+.download-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f0f2f5; gap: 12px; }
+.download-item:last-child { border-bottom: none; }
+.download-item:hover { background: #fafbfc; }
+.download-item .file-icon { font-size: 24px; flex-shrink: 0; }
+.download-item .file-info { flex: 1; }
+.download-item .file-name { font-size: 14px; font-weight: 600; color: #0f3460; }
+.download-item .file-desc { font-size: 12px; color: #888; margin-top: 2px; }
+.download-item .file-size { font-size: 11px; color: #aaa; }
+.download-btn { padding: 6px 16px; background: #0f3460; color: white; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; white-space: nowrap; flex-shrink: 0; text-decoration: none; display: inline-block; }
+.download-btn:hover { background: #1a4a7a; }
+
+/* ====== Art/Sport ====== */
+.art-prob { font-size: 14px; font-weight: 700; min-width: 48px; text-align: right; flex-shrink: 0; }
+.art-composite { font-size: 11px; color: #aaa; flex-shrink: 0; }
+
+.footer { text-align: center; padding: 20px; color: #aaa; font-size: 12px; }
+
+@media (max-width: 640px) {
+  .query-field { min-width: calc(50% - 10px); }
+  .summary-card { flex-direction: column; align-items: start; gap: 10px; }
+  .item { flex-wrap: wrap; }
+  .item .major-info { width: 100%; margin-left: 28px; white-space: normal; }
+  .item .name { max-width: 120px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎓 河南高考志愿推荐系统</h1>
+  <p>标准化排位分区间匹配 · 10冲 + 30稳 + 24保</p>
+</div>
+
+<div class="container">
+
+  <!-- Tab -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="recommend">📋 志愿推荐</button>
+    <button class="tab-btn" data-tab="algorithm">📐 算法说明</button>
+    <button class="tab-btn" data-tab="download">📦 数据下载</button>
+    <button class="tab-btn" data-tab="artsport">🎨 艺体推荐</button>
+  </div>
+
+  <!-- ====== Tab: 志愿推荐 ====== -->
+  <div class="tab-content active" id="tab-recommend">
+    <div class="query-box">
+      <div class="query-row">
+        <div class="query-field">
+          <label>年份</label>
+          <select id="yearSelect" onchange="onYearChange()"></select>
+        </div>
+        <div class="query-field">
+          <label>科类</label>
+          <select id="catSelect">
+            <option value="理科">物理类</option>
+            <option value="文科">历史类</option>
+          </select>
+        </div>
+        <div class="query-field">
+          <label>高考分数</label>
+          <input type="number" id="scoreInput" placeholder="输入分数" min="0" max="750">
+        </div>
+        <button class="btn-query" onclick="doQuery()">🎯 查询</button>
+      </div>
+      <div class="query-row2">
+        <div class="query-field">
+          <label>省份</label>
+          <select id="provSelect"><option value="全部">全部省份</option></select>
+        </div>
+        <div class="query-field">
+          <label>专业类别</label>
+          <select id="catFilterSelect"><option value="全部">全部专业</option></select>
+        </div>
+        <div class="query-field" id="subjectReqField" style="display:none">
+          <label>选科要求</label>
+          <select id="subjectReqSelect"><option value="全部">全部</option></select>
+        </div>
+        <div class="query-field">
+          <label>冲稳保策略</label>
+          <select id="strategySelect"></select>
+        </div>
+        <div class="query-field">
+          <label>专业标签</label>
+          <select id="tagFilterSelect"><option value="全部">全部</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="loading" id="loading"><div class="spinner"></div><div>正在计算推荐...</div></div>
+
+    <div class="result-box" id="resultBox">
+      <div class="summary-card" id="summaryCard">
+        <div class="summary-left">
+          <div class="summary-item"><div class="val" id="scoreDisplay">--</div><div class="lbl">分数</div></div>
+          <div class="summary-item"><div class="val" id="rankDisplay">--</div><div class="lbl">位次</div></div>
+          <div class="summary-item"><div class="val" id="stdDisplay">--</div><div class="lbl">排位分</div></div>
+          <div class="summary-item"><div class="val" id="sameScoreDisplay">--</div><div class="lbl">同分</div></div>
+        </div>
+        <div class="summary-right" id="countDisplay"></div>
+      </div>
+
+      <div class="isotonic-box" id="isotonicBox" style="display:none">
+        <h3>📊 同位分换算</h3>
+        <div class="isotonic-grid" id="isotonicGrid"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><h2>🔼 冲一冲</h2><span class="count-badge" id="chongCount">10个</span></div>
+        <div class="section-body" id="chongList"></div>
+      </div>
+      <div class="section">
+        <div class="section-header"><h2>✅ 稳一稳</h2><span class="count-badge" id="wenCount">30个</span></div>
+        <div class="section-body" id="wenList"></div>
+      </div>
+      <div class="section">
+        <div class="section-header"><h2>🔽 保一保</h2><span class="count-badge" id="baoCount">24个</span></div>
+        <div class="section-body" id="baoList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Tab: 算法说明 ====== -->
+  <div class="tab-content" id="tab-algorithm">
+    <div class="algo-box">
+      <h2>📐 算法原理说明</h2>
+
+      <h3>一、核心问题</h3>
+      <p>高考分数在不同年份的含金量不同——试卷难度、考生人数、分数线都在变。<br>
+      2024年的600分和2020年的600分不可直接比较。<br>
+      我们的算法将历年分数统一映射到 <strong>0 ~ 1,000,000</strong> 的<strong>标准化排位分</strong>空间，实现跨年份可比对。</p>
+
+      <h3>二、排位标准分计算公式</h3>
+      <div class="formula">
+        标准分 = ln(N / rank) / ln(N) × 1,000,000
+      </div>
+      <ul>
+        <li><strong>N</strong> = 当年该科类总考生人数（如2024年理科约60万）</li>
+        <li><strong>rank</strong> = 考生的省排名（位次）</li>
+        <li><strong>ln()</strong> = 自然对数</li>
+      </ul>
+      <p>为什么用对数？因为位次越靠前，每前进一名越难。对数变换将这种非线性关系线性化。</p>
+
+      <div class="formula" style="text-align:left; font-weight:normal; font-size:14px">
+        <div style="margin:6px 0"><strong>🟢 示例：</strong></div>
+        <div>2024年理科610分，位次约 <span class="hl">17,000</span> 名，总考生 <span class="hl2">600,000</span> 人</div>
+        <div style="margin:6px 0">标准分 = ln(600,000 / 17,000) / ln(600,000) × 1,000,000</div>
+        <div>= ln(35.29) / ln(600,000) × 1,000,000</div>
+        <div>= 3.564 / 13.305 × 1,000,000 ≈ <span class="hl" style="font-size:18px">267,000</span></div>
+      </div>
+
+      <h3>三、区间化处理</h3>
+      <p>同一分数可能对应多名考生（如600分有500人同分），导致位次是一个范围而非单点。</p>
+      <div class="formula" style="text-align:left; font-weight:normal; font-size:14px">
+        <div><strong>学生区间：</strong> 分数 → 最低位次 ~ 最高位次 → 最低排位分 ~ 最高排位分</div>
+        <div style="margin-top:6px"><strong>院校/专业组区间：</strong> 该专业/专业组录取的全部学生的成绩范围</div>
+      </div>
+      <p>我们用<strong>区间重叠度</strong>来计算匹配程度，而非简单的"分数线过了没"。</p>
+
+      <h3>四、匹配算法（冲稳保判定）</h3>
+      <div class="formula" style="text-align:left; font-weight:normal; font-size:14px">
+        <div>令 <strong>s_mid</strong> = 学生区间的中点，<strong>t_center</strong> = 目标区间的中点</div>
+        <div><strong>t_radius</strong> = (目标区间宽度) / 2</div>
+        <div style="margin:6px 0"><strong>rel_pos</strong> = (s_mid - t_center) / t_radius</div>
+        <div>rel_pos < -1 → <span class="hl">冲</span>（学生排位分低于目标）</div>
+        <div>-1 ≤ rel_pos ≤ 1 → <span class="hl2">稳</span>（学生排位分在目标范围内）</div>
+        <div>rel_pos > 1 → <span class="hl">保</span>（学生排位分高于目标）</div>
+      </div>
+
+      <h3>五、概率映射</h3>
+      <table>
+        <tr><th>档次</th><th>rel_pos 范围</th><th>概率范围</th><th>说明</th></tr>
+        <tr><td>冲</td><td>-3 ~ -1</td><td>1% ~ 30%</td><td>排位分低于目标，但差距不大时可以尝试</td></tr>
+        <tr><td>稳</td><td>-1 ~ 1</td><td>30% ~ 70%</td><td>排位分在目标区间内，录取概率较高</td></tr>
+        <tr><td>保</td><td>1 ~ 3</td><td>70% ~ 98%</td><td>排位分明显高于目标，作为保底</td></tr>
+      </table>
+      <p>概率由 rel_pos 在档内的<strong>相对位置</strong>线性插值得到。越靠近目标区间中心，概率越高。</p>
+
+      <h3>六、推荐数量分配</h3>
+      <div class="formula" style="text-align:left; font-weight:normal; font-size:14px">
+        冲：<span class="hl">10</span> 个 &nbsp;|&nbsp; 稳：<span class="hl2">30</span> 个 &nbsp;|&nbsp; 保：<span class="hl">24</span> 个 &nbsp;=&nbsp; <strong>64 个志愿</strong>
+      </div>
+      <p>对应2025年新高考最多64个志愿的填报策略。</p>
+      <ul>
+        <li><strong>冲</strong>：按与目标的"最近距"排序，取最接近的10个</li>
+        <li><strong>稳</strong>：按"居中程度"排序（|rel_pos|最小），取最居中的30个</li>
+        <li><strong>保</strong>：按与目标的"最近距"排序（从上方），取最接近的24个</li>
+      </ul>
+
+      <h3>七、数据范围说明</h3>
+      <table>
+        <tr><th>年份</th><th>推荐内容</th><th>选科要求</th></tr>
+        <tr><td>2017 ~ 2024</td><td>学校 + 具体专业名称</td><td>❌ 不适用（旧高考）</td></tr>
+        <tr><td>2025</td><td>学校 + 专业组（含组内专业列表）</td><td>✅ 根据选科要求过滤</td></tr>
+      </table>
+
+      <h3>八、筛选条件</h3>
+      <table>
+        <tr><th>筛选条件</th><th>说明</th></tr>
+        <tr><td>省份</td><td>根据学校名称中的省份/城市关键词匹配（覆盖32省+香港）</td></tr>
+        <tr><td>专业类别</td><td>1,395个专业归入10大类别（计算机/医学/经管等），关键词匹配</td></tr>
+        <tr><td>选科要求</td><td>仅2025年生效。支持"不限"、"政"、"地"、"化"、"生"及组合条件</td></tr>
+      </table>
+
+      <div class="note">
+        <strong>📝 数据来源：</strong>河南省教育考试院官方公布的"一分一段表"和"录取数据"。<br>
+        每年总人数N不同，但标准分的对数变换使其在 0 ~ 1,000,000 范围内可比，<br>
+        同一个排位分在不同年份代表相同的省排名相对位置。
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Tab: 数据下载 ====== -->
+  <div class="tab-content" id="tab-download">
+    <div class="algo-box">
+      <h2>📦 数据处理结果下载</h2>
+      <p style="margin-bottom:14px;color:#666">以下为系统预处理的 JSON 数据文件，可供下载用于分析或二次开发。</p>
+      <div id="downloadList">
+        <div style="text-align:center;padding:20px;color:#999">正在加载...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Tab: 艺体推荐 ====== -->
+  <div class="tab-content" id="tab-artsport">
+    <div class="query-box">
+      <div class="query-row">
+        <div class="query-field">
+          <label>艺术类别</label>
+          <select id="artCatSelect"><option value="">加载中...</option></select>
+        </div>
+        <div class="query-field">
+          <label>文化课分数</label>
+          <input type="number" id="artCultureInput" placeholder="文化分" min="0" max="750">
+        </div>
+        <div class="query-field">
+          <label>专业课分数</label>
+          <input type="number" id="artMajorInput" placeholder="专业分" min="0" max="300">
+        </div>
+        <button class="btn-query" onclick="doArtQuery()">🎯 推荐</button>
+      </div>
+      <div style="font-size:12px;color:#999;margin-top:8px;padding-top:8px;border-top:1px solid #f0f2f5">
+        💡 <strong>说明</strong>：艺体类根据各学校专业选用的不同综合分公式（文化×权重+专业/满分×750×权重），
+        计算学生综合分并与2021-2023年历史数据比较，按录取概率从高到低排序。<br>
+        数据来源《2021-2023年河南省普通高校招生报考及录取统计（省统考艺术类和体育类）》。
+      </div>
+    </div>
+
+    <div class="error-msg" id="artErrorMsg"></div>
+    <div class="loading" id="artLoading"><div class="spinner"></div><div>正在计算艺体推荐...</div></div>
+
+    <div class="result-box" id="artResultBox">
+      <div class="summary-card" style="background:linear-gradient(135deg,#3f1a4a,#6b3a7a)">
+        <div class="summary-left">
+          <div class="summary-item"><div class="val" id="artScoreDisplay">--</div><div class="lbl">文化+专业</div></div>
+          <div class="summary-item"><div class="val" id="artCompositeDisplay">--</div><div class="lbl">综合分</div></div>
+          <div class="summary-item"><div class="val" id="artTotalDisplay">--</div><div class="lbl">可报专业</div></div>
+        </div>
+        <div class="summary-right" id="artProbCount" style="font-size:13px;color:#d4b8e8">按录取概率从高至低排序</div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><h2>🎯 推荐结果</h2><span class="count-badge" id="artRecCount"></span></div>
+        <div class="section-body" id="artRecList"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">数据：河南教育考试院 2017-2025 | 算法：标准化排位分区间匹配</div>
+
+<script>
+async function init() {
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  try {
+    const [yR, pR, cR, sR] = await Promise.all([
+      fetch('/api/years'), fetch('/api/provinces'),
+      fetch('/api/categories'), fetch('/api/subject-requirements')
+    ]);
+    const years = await yR.json();
+    const provs = await pR.json();
+    const cats = await cR.json();
+    const subjs = await sR.json();
+
+    const yearSel = document.getElementById('yearSelect');
+    years.years.forEach(y => {
+      const o = document.createElement('option');
+      o.value = y; o.textContent = y + '年';
+      yearSel.appendChild(o);
+    });
+    // default to latest year
+    if (years.years.length) yearSel.value = String(Math.max(...years.years));
+
+    const provSel = document.getElementById('provSelect');
+    provs.provinces.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      provSel.appendChild(o);
+    });
+
+    const catSel = document.getElementById('catFilterSelect');
+    cats.categories.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      catSel.appendChild(o);
+    });
+
+    const subjSel = document.getElementById('subjectReqSelect');
+    subjs.requirements.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = s === '不限' ? '不限选科' : s;
+      subjSel.appendChild(o);
+    });
+
+    // 策略选择
+    const sR2 = await fetch('/api/strategies');
+    const strs = await sR2.json();
+    const stratSel = document.getElementById('strategySelect');
+    strs.strategies.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.id; o.textContent = s.name;
+      stratSel.appendChild(o);
+    });
+
+    // 标签筛选
+    const tR = await fetch('/api/tag-filters');
+    const tgs = await tR.json();
+    const tagSel = document.getElementById('tagFilterSelect');
+    tgs.filters.forEach(t => {
+      const o = document.createElement('option');
+      o.value = t; o.textContent = t;
+      tagSel.appendChild(o);
+    });
+
+    // 标签详细说明
+    try {
+      const tdR = await fetch('/api/tag-descriptions');
+      window.TAG_DESC = (await tdR.json()).descriptions || {};
+    } catch(e) { window.TAG_DESC = {}; }
+
+    onYearChange();
+    loadDownloadList();
+    loadArtCategories();
+  } catch(e) { console.error(e); }
+
+  document.getElementById('scoreInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doQuery();
+  });
+}
+
+function onYearChange() {
+  const year = parseInt(document.getElementById('yearSelect').value);
+  document.getElementById('subjectReqField').style.display = year >= 2025 ? 'block' : 'none';
+}
+
+async function doQuery() {
+  const year = document.getElementById('yearSelect').value;
+  const category = document.getElementById('catSelect').value;
+  const score = parseInt(document.getElementById('scoreInput').value);
+  const province = document.getElementById('provSelect').value;
+  const majorCat = document.getElementById('catFilterSelect').value;
+  const subjReq = document.getElementById('subjectReqSelect').value;
+  const strategy = document.getElementById('strategySelect').value;
+  const tagFilter = document.getElementById('tagFilterSelect').value;
+
+  if (!score || score < 0 || score > 750) { showError('请输入有效分数'); return; }
+  hideError();
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('resultBox').classList.remove('show');
+
+  const params = new URLSearchParams({
+    score, year, category, province,
+    major_category: majorCat, subject_req: subjReq,
+    strategy, tag_filter: tagFilter
+  });
+
+  try {
+    const [qR, rR] = await Promise.all([
+      fetch('/api/query?' + params),
+      fetch('/api/recommend?' + params)
+    ]);
+    if (!qR.ok) { const e=await qR.json(); showError(e.detail||'查询失败'); return; }
+    if (!rR.ok) { const e2=await rR.json(); showError(e2.detail||'推荐失败'); document.getElementById('loading').classList.remove('show'); return; }
+    const q = await qR.json();
+    const r = await rR.json();
+    showResults(q, r);
+    // Switch to recommend tab
+    document.querySelector('[data-tab="recommend"]').click();
+  } catch(e) {
+    showError('网络错误，请确保后端服务已启动 (http://127.0.0.1:8000)');
+  }
+  document.getElementById('loading').classList.remove('show');
+}
+
+function showResults(q, r) {
+  const sr = q.standardized_range;
+  document.getElementById('scoreDisplay').textContent = q.query.score + '分';
+  document.getElementById('rankDisplay').textContent = sr.rank_high.toLocaleString() + '~' + sr.rank_low.toLocaleString();
+  document.getElementById('stdDisplay').textContent = sr.low.toLocaleString() + '~' + sr.high.toLocaleString();
+  document.getElementById('sameScoreDisplay').textContent = q.same_score_count.toLocaleString();
+
+  const iso = q.isotonic_scores;
+  const isoKeys = Object.keys(iso).sort((a,b)=>b-a);
+  if (isoKeys.length > 0) {
+    document.getElementById('isotonicBox').style.display = 'block';
+    document.getElementById('isotonicGrid').innerHTML = isoKeys.map(y =>
+      '<div class="isotonic-tag">' + y + '年≈' + iso[y] + '分</div>'
+    ).join('');
+  } else {
+    document.getElementById('isotonicBox').style.display = 'none';
+  }
+
+  const tc = r.tier_counts;
+  const stratName = r.tier_config && r.tier_config.strategy_name ? r.tier_config.strategy_name : '';
+  document.getElementById('countDisplay').innerHTML =
+    '<div style="font-size:12px;margin-bottom:4px;opacity:0.8">策略: ' + stratName + '</div>' +
+    '<div>' +
+    '<span class="tier-badge chong">冲 ' + tc.chong + '</span>' +
+    '<span class="tier-badge wen">稳 ' + tc.wen + '</span>' +
+    '<span class="tier-badge bao">保 ' + tc.bao + '</span>' +
+    '</div>';
+
+
+
+  const is2025 = parseInt(q.query.year) >= 2025;
+  renderList('chongList', r.recommendations.filter(x => x.tier === 'chong'), 'chong', is2025);
+  renderList('wenList', r.recommendations.filter(x => x.tier === 'wen'), 'wen', is2025);
+  renderList('baoList', r.recommendations.filter(x => x.tier === 'bao'), 'bao', is2025);
+
+  // Update section header counts
+  document.getElementById('chongCount').textContent = tc.chong + '个';
+  document.getElementById('wenCount').textContent = tc.wen + '个';
+  document.getElementById('baoCount').textContent = tc.bao + '个';
+
+  document.getElementById('chongCount').textContent = tc.chong + '个';
+  document.getElementById('wenCount').textContent = tc.wen + '个';
+  document.getElementById('baoCount').textContent = tc.bao + '个';
+
+  document.getElementById('resultBox').classList.add('show');
+  document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderList(id, items, tier, is2025) {
+  const el = document.getElementById(id);
+  if (!items.length) {
+    el.innerHTML = '<div style="padding:16px;text-align:center;color:#999">暂无推荐</div>';
+    return;
+  }
+  const probColor = p => p >= 70 ? '#389e0d' : p >= 30 ? '#0958d9' : '#d4380d';
+  el.innerHTML = items.map((item, i) => {
+    let majorInfo = '';
+    let subjTag = '';
+    if (is2025) {
+      const ms = item.majors || [];
+      majorInfo = ms.length > 0 ? ms.slice(0, 4).join('、') + (ms.length > 4 ? '…' : '') : item.group_code + '组';
+      const sr = item.subject_req || '';
+      if (sr && sr !== '不限') subjTag = '<span class="subj-req">选科: ' + sr + '</span>';
+    } else {
+      majorInfo = item.major || '';
+    }
+    const prov = item.province || '';
+    const tags = item.tags || [];
+    const adviceText = item.advice || '名师建议：根据分数段合理选择';
+    const tagsHtml = tags.length > 0
+      ? tags.slice(0, 3).map(t => {
+        const cleanTag = t.replace(/[^\u4e00-\u9fa5a-zA-Z]/g, '').replace(/热门|冷门/g, '') || t;
+        const tooltip = window.TAG_DESC[cleanTag] || '';
+        return '<span class="tag-item" title="' + tooltip + '">' + t + '</span>';
+      }).join('')
+      : '';
+    return '<div class="item">' +
+      '<div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1">' +
+        '<span class="idx">' + (i+1) + '</span>' +
+        '<span class="tier-tag ' + tier + '">' + (tier === 'chong' ? '冲' : tier === 'wen' ? '稳' : '保') + '</span>' +
+        '<span class="prov-tag">' + prov + '</span>' +
+        '<span class="name">' + item.school + '</span>' +
+        '<span class="major-info">' + majorInfo + '</span>' +
+        subjTag +
+        tagsHtml +
+        '<span class="prob" style="color:' + probColor(item.probability) + '">' + item.probability + '%</span>' +
+      '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function showError(msg) {
+  document.getElementById('errorMsg').textContent = msg;
+  document.getElementById('errorMsg').classList.add('show');
+}
+function hideError() {
+  document.getElementById('errorMsg').classList.remove('show');
+}
+
+async function loadDownloadList() {
+  try {
+    const r = await fetch('/api/data-files');
+    const d = await r.json();
+    const el = document.getElementById('downloadList');
+    if (!d.files || !d.files.length) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:#999">暂无文件</div>';
+      return;
+    }
+    const baseUrl = window.location.origin;
+    el.innerHTML = d.files.map(f =>
+      '<div class="download-item">' +
+        '<span class="file-icon">📄</span>' +
+        '<div class="file-info">' +
+          '<div class="file-name">' + f.filename + '</div>' +
+          '<div class="file-desc">' + f.description + '</div>' +
+          '<div class="file-size">' + (f.size_mb > 0 ? f.size_mb + ' MB' : '< 0.01 MB') + '</div>' +
+        '</div>' +
+        '<a class="download-btn" href="' + baseUrl + '/api/download/' + f.filename + '" download>' +
+          '⬇ 下载' +
+        '</a>' +
+      '</div>'
+    ).join('');
+  } catch(e) {
+    document.getElementById('downloadList').innerHTML = '<div style="text-align:center;padding:20px;color:#cf1322">加载失败</div>';
+  }
+}
+
+// ========== 艺体推荐 ==========
+async function loadArtCategories() {
+  try {
+    const r = await fetch('/api/art-categories');
+    const d = await r.json();
+    const sel = document.getElementById('artCatSelect');
+    sel.innerHTML = '';
+    d.categories.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      sel.appendChild(o);
+    });
+    sel.value = '美术类';
+  } catch(e) {}
+  document.getElementById('artCultureInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doArtQuery();
+  });
+  document.getElementById('artMajorInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doArtQuery();
+  });
+}
+
+async function doArtQuery() {
+  const category = document.getElementById('artCatSelect').value;
+  const culture = parseInt(document.getElementById('artCultureInput').value);
+  const major = parseInt(document.getElementById('artMajorInput').value);
+
+  if (!category || !culture || !major || culture < 0 || major < 0) {
+    document.getElementById('artErrorMsg').textContent = '请填写文化课和专业课分数';
+    document.getElementById('artErrorMsg').classList.add('show');
+    return;
+  }
+  document.getElementById('artErrorMsg').classList.remove('show');
+  document.getElementById('artLoading').classList.add('show');
+  document.getElementById('artResultBox').classList.remove('show');
+
+  const params = new URLSearchParams({ culture, major, category });
+  try {
+    const r = await fetch('/api/art-recommend?' + params);
+    const d = await r.json();
+    showArtResults(d, culture, major, category);
+  } catch(e) {
+    document.getElementById('artErrorMsg').textContent = '网络错误，请确保后端已启动';
+    document.getElementById('artErrorMsg').classList.add('show');
+  }
+  document.getElementById('artLoading').classList.remove('show');
+}
+
+function showArtResults(d, culture, major, category) {
+  const recs = d.recommendations || [];
+  document.getElementById('artScoreDisplay').textContent = culture + '文化+' + major + '专业';
+  document.getElementById('artTotalDisplay').textContent = recs.length + '个';
+  document.getElementById('artRecCount').textContent = '共' + recs.length + '个专业';
+
+  // 看第一个推荐的综合分
+  if (recs.length > 0) {
+    document.getElementById('artCompositeDisplay').textContent = recs[0].student_composite;
+  }
+
+  const el = document.getElementById('artRecList');
+  if (!recs.length) {
+    el.innerHTML = '<div style="padding:24px;text-align:center;color:#999">暂无推荐，请尝试调整分数</div>';
+  } else {
+    el.innerHTML = recs.map((item, i) => {
+      const prob = item.probability;
+      const pct = item.culture_pct || 50;
+      const mpt = item.major_pct || 50;
+      const probColor = prob >= 80 ? '#389e0d' : prob >= 50 ? '#0958d9' : '#d4380d';
+      return '<div class="item">' +
+        '<span class="idx">' + (i+1) + '</span>' +
+        '<span class="name">' + item.school + '</span>' +
+        '<span class="major-info">' + item.major + '</span>' +
+        '<span class="art-composite">' + item.student_composite + '/' + item.min_score + '</span>' +
+        '<span class="art-prob" style="color:' + probColor + '">' + prob + '%</span>' +
+        '</div>';
+    }).join('');
+  }
+  document.getElementById('artResultBox').classList.add('show');
+  document.getElementById('tab-artsport').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+init();
+</script>
+</body>
+</html>
