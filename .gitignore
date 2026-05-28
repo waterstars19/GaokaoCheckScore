@@ -11,6 +11,15 @@ processed/
 河南_*.json
 河南一分一段表_*.json
 
+# 下载文件（太大）
+downloads/
+
+# 归档中间文件
+archive/
+
+# 备份文件
+*.bak
+
 # Python
 __pycache__/
 *.pyc

@@ -118,6 +118,54 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 
 .footer { text-align: center; padding: 20px; color: #aaa; font-size: 12px; }
 
+/* ====== Query System ====== */
+.query-target { display: flex; gap: 8px; margin-bottom: 12px; }
+.query-target-btn { padding: 7px 18px; border: 1.5px solid #e0e3eb; border-radius: 8px; font-size: 14px; cursor: pointer; background: #fafbfc; transition: all .2s; }
+.query-target-btn.active { background: #0f3460; color: white; border-color: #0f3460; }
+.query-target-btn:hover:not(.active) { border-color: #0f3460; }
+
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.filter-chips .chip-lbl { font-size: 11px; color: #888; font-weight: 500; margin-right: 2px; flex-shrink: 0; }
+.chip-btn { padding: 4px 10px; border: 1.5px solid #e0e3eb; border-radius: 6px; font-size: 12px; cursor: pointer; background: #fafbfc; transition: all .15s; white-space: nowrap; }
+.chip-btn.active { background: #0f3460; color: white; border-color: #0f3460; }
+.chip-btn:hover:not(.active) { border-color: #0f3460; }
+
+.query-table-wrap { background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); overflow-x: auto; }
+.query-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.query-table th { background: #f0f4ff; padding: 10px 12px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #d6e4ff; white-space: nowrap; }
+.query-table td { padding: 9px 12px; border-bottom: 1px solid #f0f2f5; color: #555; }
+.query-table tr.school-row { cursor: pointer; transition: background .15s; }
+.query-table tr.school-row:hover { background: #f5f7fb; }
+.query-table tr.school-row.expanded { background: #f0f4ff; }
+.query-table tr.detail-row { display: none; background: #fafcfd; }
+.query-table tr.detail-row.show { display: table-row; }
+.query-table tr.detail-row td { padding: 0; }
+.major-detail-box { padding: 14px 16px; }
+.major-detail-box .major-item { display: inline-block; background: #eef2f8; border-radius: 6px; padding: 3px 10px; font-size: 12px; margin: 3px 4px 3px 0; cursor: pointer; color: #0f3460; transition: all .15s; }
+.major-detail-box .major-item:hover { background: #d6e4ff; }
+.major-detail-box .major-item.selected { background: #0f3460; color: white; }
+.major-detail-body { margin-top: 10px; padding: 12px; background: #f8fafd; border-radius: 8px; border: 1px solid #e8ecf4; font-size: 12px; line-height: 1.7; }
+.major-detail-body h4 { font-size: 13px; color: #0f3460; margin-bottom: 6px; }
+.major-detail-body p { margin: 4px 0; color: #555; }
+
+.level-badge { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.level-badge.lvl-985 { background: #fff0f0; color: #d4380d; }
+.level-badge.lvl-211 { background: #fff7e6; color: #d46b08; }
+.level-badge.lvl-shuangyiliu { background: #f0f5ff; color: #2f54eb; }
+.level-badge.lvl-guozhongdian { background: #f6ffed; color: #389e0d; }
+.level-badge.lvl-shengzhongdian { background: #f5f5f5; color: #666; }
+.level-badge.lvl-putong { background: #fafafa; color: #999; }
+
+.query-table .expand-btn { color: #0f3460; font-size: 18px; cursor: pointer; display: inline-block; transition: transform .2s; text-align: center; width: 24px; }
+.query-table .expand-btn.open { transform: rotate(90deg); }
+
+.pagination { display: flex; justify-content: center; align-items: center; gap: 4px; padding: 16px 0; flex-wrap: wrap; }
+.pagination .page-btn { padding: 6px 12px; border: 1px solid #e0e3eb; border-radius: 6px; font-size: 13px; cursor: pointer; background: #fafbfc; min-width: 34px; text-align: center; transition: all .15s; }
+.pagination .page-btn:hover:not(.active):not(:disabled) { border-color: #0f3460; color: #0f3460; }
+.pagination .page-btn.active { background: #0f3460; color: white; border-color: #0f3460; }
+.pagination .page-btn:disabled { opacity: .4; cursor: not-allowed; }
+.pagination .page-info { font-size: 12px; color: #999; margin: 0 8px; }
+
 @media (max-width: 640px) {
   .query-field { min-width: calc(50% - 10px); }
   .summary-card { flex-direction: column; align-items: start; gap: 10px; }
@@ -142,6 +190,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
     <button class="tab-btn" data-tab="algorithm">📐 算法说明</button>
     <button class="tab-btn" data-tab="download">📦 数据下载</button>
     <button class="tab-btn" data-tab="artsport">🎨 艺体推荐</button>
+    <button class="tab-btn" data-tab="query">🔍 查询系统</button>
   </div>
 
   <!-- ====== Tab: 志愿推荐 ====== -->
@@ -369,6 +418,123 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
     </div>
   </div>
 
+  <!-- ====== Tab: 查询系统 ====== -->
+  <div class="tab-content" id="tab-query">
+    <div class="query-box">
+      <!-- 查询目标切换 -->
+      <div class="query-target">
+        <span style="font-size:13px;font-weight:600;color:#555;margin-right:6px;line-height:34px">查询目标：</span>
+        <button class="query-target-btn active" data-qt="school">📚 查院校</button>
+        <button class="query-target-btn" data-qt="major">📖 查专业</button>
+      </div>
+
+      <div class="query-row">
+        <div class="query-field">
+          <label>院校名称</label>
+          <input type="text" id="qSchool" placeholder="输入院校名称…">
+        </div>
+        <div class="query-field">
+          <label>专业名称</label>
+          <input type="text" id="qMajor" placeholder="输入专业名称…">
+        </div>
+        <div class="query-field">
+          <label>省份</label>
+          <select id="qProvince"><option value="全部">全部省份</option></select>
+        </div>
+        <div class="query-field">
+          <label>学位</label>
+          <select id="qDegree">
+            <option value="全部">全部</option>
+            <option value="本科">本科</option>
+            <option value="专科">专科</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="query-row" style="align-items:center">
+        <div class="query-field" style="flex:2">
+          <label>层次</label>
+          <div class="filter-chips" id="levelChips">
+            <span class="chip-lbl">层次：</span>
+            <button class="chip-btn active" data-v="全部">全部</button>
+            <button class="chip-btn" data-v="985">985</button>
+            <button class="chip-btn" data-v="211">211</button>
+            <button class="chip-btn" data-v="双一流">双一流</button>
+            <button class="chip-btn" data-v="国重点">国重点</button>
+            <button class="chip-btn" data-v="省重点">省重点</button>
+            <button class="chip-btn" data-v="普通">普通</button>
+          </div>
+        </div>
+        <div class="query-field" style="flex:2">
+          <label>性质</label>
+          <div class="filter-chips" id="natureChips">
+            <span class="chip-lbl">性质：</span>
+            <button class="chip-btn active" data-v="全部">全部</button>
+            <button class="chip-btn" data-v="公办">公办</button>
+            <button class="chip-btn" data-v="民办">民办</button>
+            <button class="chip-btn" data-v="中外合作办学">中外合作办学</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="query-row" style="margin-bottom:0">
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn-query" onclick="doQueryMeta()">🔍 查询</button>
+          <button class="btn-query" style="background:#888;" onclick="resetQuery()">🔄 重置</button>
+        </div>
+        <span id="queryCount" style="font-size:13px;color:#888;margin-left:12px;line-height:36px"></span>
+      </div>
+    </div>
+
+    <div class="error-msg" id="queryErrorMsg"></div>
+    <div class="loading" id="queryLoading"><div class="spinner"></div><div>正在查询...</div></div>
+
+    <div class="result-box" id="queryResultBox">
+      <!-- 院校视图 -->
+      <div class="query-table-wrap" id="schoolTableWrap" style="display:none">
+        <table class="query-table">
+          <thead>
+            <tr>
+              <th style="width:36px">#</th>
+              <th style="width:24px"></th>
+              <th>院校</th>
+              <th>省份</th>
+              <th>层次</th>
+              <th>性质</th>
+              <th>类型</th>
+              <th>学位</th>
+              <th>专业数</th>
+            </tr>
+          </thead>
+          <tbody id="schoolTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- 专业视图 -->
+      <div class="query-table-wrap" id="majorTableWrap" style="display:none">
+        <table class="query-table">
+          <thead>
+            <tr>
+              <th style="width:36px">#</th>
+              <th>院校</th>
+              <th>省份</th>
+              <th>层次</th>
+              <th>性质</th>
+              <th>专业</th>
+              <th>选科建议</th>
+              <th>就业率</th>
+              <th>详情</th>
+            </tr>
+          </thead>
+          <tbody id="majorTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- 分页 -->
+      <div class="pagination" id="queryPagination"></div>
+    </div>
+  </div>
+
 </div>
 
 <div class="footer">数据：河南教育考试院 2017-2025 | 算法：标准化排位分区间匹配</div>
@@ -409,6 +575,13 @@ async function init() {
       const o = document.createElement('option');
       o.value = p; o.textContent = p;
       provSel.appendChild(o);
+    });
+    // 查询系统的省份下拉
+    const qProvSel = document.getElementById('qProvince');
+    provs.provinces.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      qProvSel.appendChild(o);
     });
 
     const catSel = document.getElementById('catFilterSelect');
@@ -645,7 +818,10 @@ async function loadArtCategories() {
       sel.appendChild(o);
     });
     sel.value = '美术类';
-  } catch(e) {}
+  } catch(e) {
+    console.error('加载艺体类别失败:', e);
+    document.getElementById('artCatSelect').innerHTML = '<option value="">加载失败，请刷新重试</option>';
+  }
   document.getElementById('artCultureInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') doArtQuery();
   });
@@ -712,6 +888,337 @@ function showArtResults(d, culture, major, category) {
   document.getElementById('artResultBox').classList.add('show');
   document.getElementById('tab-artsport').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+// ========== 查询系统 ==========
+let queryTarget = 'school';
+let queryPage = 1;
+let queryPageSize = 50;
+let queryFilters = {};
+let selectedMajor = null;  // 院校视图下选中的专业
+
+// 查询目标切换
+document.querySelectorAll('.query-target-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.query-target-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    queryTarget = btn.dataset.qt;
+    queryPage = 1;
+    selectedMajor = null;
+    document.getElementById('schoolTableWrap').style.display = queryTarget === 'school' ? '' : 'none';
+    document.getElementById('majorTableWrap').style.display = queryTarget === 'major' ? '' : 'none';
+    document.getElementById('queryCount').textContent = '';
+  });
+});
+
+// 层次 chip 切换
+function setupChips(containerId, paramName) {
+  document.getElementById(containerId).addEventListener('click', e => {
+    if (!e.target.classList.contains('chip-btn')) return;
+    if (e.target.dataset.v === '全部') {
+      // 点"全部"，取消其他
+      const btns = document.getElementById(containerId).querySelectorAll('.chip-btn');
+      btns.forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      queryFilters[paramName] = '全部';
+    } else {
+      // 取消"全部"选中
+      document.getElementById(containerId).querySelector('[data-v="全部"]').classList.remove('active');
+      e.target.classList.toggle('active');
+      const sel = [];
+      document.getElementById(containerId).querySelectorAll('.chip-btn.active').forEach(b => {
+        if (b.dataset.v !== '全部') sel.push(b.dataset.v);
+      });
+      queryFilters[paramName] = sel.length > 0 ? sel.join(',') : '全部';
+      if (sel.length === 0) {
+        document.getElementById(containerId).querySelector('[data-v="全部"]').classList.add('active');
+        queryFilters[paramName] = '全部';
+      }
+    }
+  });
+}
+setupChips('levelChips', 'level');
+setupChips('natureChips', 'nature');
+
+// 查询
+async function doQueryMeta() {
+  const school = document.getElementById('qSchool').value.trim();
+  const major = document.getElementById('qMajor').value.trim();
+  const province = document.getElementById('qProvince').value;
+  const degree = document.getElementById('qDegree').value;
+
+  queryPage = 1;
+  selectedMajor = null;
+
+  document.getElementById('queryErrorMsg').classList.remove('show');
+  document.getElementById('queryLoading').classList.add('show');
+  document.getElementById('queryResultBox').classList.remove('show');
+
+  const params = new URLSearchParams({
+    target: queryTarget,
+    page: queryPage,
+    page_size: queryPageSize,
+  });
+  if (school) params.set('school', school);
+  if (major) params.set('major', major);
+  if (province !== '全部') params.set('province', province);
+  if (queryFilters.level && queryFilters.level !== '全部') params.set('level', queryFilters.level);
+  if (queryFilters.nature && queryFilters.nature !== '全部') params.set('nature', queryFilters.nature);
+  if (degree !== '全部') params.set('degree', degree);
+
+  try {
+    const r = await fetch('/api/query-meta?' + params);
+    if (!r.ok) { const e = await r.json(); throw new Error(e.detail || '查询失败'); }
+    const d = await r.json();
+    renderQueryResults(d);
+  } catch(e) {
+    document.getElementById('queryErrorMsg').textContent = '查询失败：' + e.message;
+    document.getElementById('queryErrorMsg').classList.add('show');
+  }
+  document.getElementById('queryLoading').classList.remove('show');
+}
+
+function resetQuery() {
+  document.getElementById('qSchool').value = '';
+  document.getElementById('qMajor').value = '';
+  document.getElementById('qProvince').value = '全部';
+  document.getElementById('qDegree').value = '全部';
+  queryFilters = {};
+  queryPage = 1;
+  selectedMajor = null;
+  // 重置层次 chips
+  document.querySelectorAll('#levelChips .chip-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#levelChips [data-v="全部"]').classList.add('active');
+  // 重置性质 chips
+  document.querySelectorAll('#natureChips .chip-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#natureChips [data-v="全部"]').classList.add('active');
+  document.getElementById('queryCount').textContent = '';
+  document.getElementById('queryResultBox').classList.remove('show');
+  document.getElementById('queryErrorMsg').classList.remove('show');
+}
+
+function levelBadgeHtml(level) {
+  const m = {
+    '985': 'lvl-985', '211': 'lvl-211', '双一流': 'lvl-shuangyiliu',
+    '国重点': 'lvl-guozhongdian', '省重点': 'lvl-shengzhongdian', '普通': 'lvl-putong'
+  };
+  return '<span class="level-badge ' + (m[level] || '') + '">' + (level || '-') + '</span>';
+}
+
+function renderQueryResults(d) {
+  const total = d.total;
+  document.getElementById('queryCount').textContent = '共 ' + total + ' 条结果';
+  document.getElementById('queryResultBox').classList.add('show');
+
+  document.getElementById('schoolTableWrap').style.display = queryTarget === 'school' ? '' : 'none';
+  document.getElementById('majorTableWrap').style.display = queryTarget === 'major' ? '' : 'none';
+
+  if (queryTarget === 'school') {
+    renderSchoolTable(d.results, d.page, d.page_size);
+  } else {
+    renderMajorTable(d.results, d.page, d.page_size);
+  }
+
+  renderPagination(d);
+  document.getElementById('queryResultBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderSchoolTable(results, page, pageSize) {
+  const tbody = document.getElementById('schoolTableBody');
+  if (!results.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#999">未找到匹配的院校</td></tr>';
+    return;
+  }
+  tbody.innerHTML = results.map((item, i) => {
+    const rowId = 'sch-row-' + i;
+    const detailId = 'sch-detail-' + i;
+    const majors = item.majors || [];
+    const majorsHtml = majors.length > 0
+      ? majors.map(m => '<span class="major-item" data-name="' + m + '" data-school="' + item.school + '" onclick="showMajorDetail(event, \'' + detailId + '\', \'' + m + '\', \'' + item.school + '\')">' + m + '</span>').join('\n          ')
+      : '<span style="color:#999;font-size:12px">暂无专业数据</span>';
+    const hasMajors = majors.length > 0;
+    return '<tr class="school-row" id="' + rowId + '" onclick="toggleSchoolRow(\'' + rowId + '\', \'' + detailId + '\')">' +
+      '<td>' + ((page - 1) * pageSize + i + 1) + '</td>' +
+      '<td><span class="expand-btn" id="' + rowId + '-expand">▶</span></td>' +
+      '<td><strong>' + item.school + '</strong></td>' +
+      '<td>' + (item.province || '-') + '</td>' +
+      '<td>' + levelBadgeHtml(item.level) + '</td>' +
+      '<td>' + (item.nature || '-') + '</td>' +
+      '<td>' + (item.type || '-') + '</td>' +
+      '<td>' + (item.degree || '-') + '</td>' +
+      '<td>' + item.majors_count + '</td>' +
+      '</tr>' +
+      '<tr class="detail-row" id="' + detailId + '">' +
+      '<td colspan="9">' +
+        '<div class="major-detail-box">' +
+          '<div style="font-weight:600;font-size:13px;color:#333;margin-bottom:8px">📚 开设专业（点击查看详情）</div>' +
+          majorsHtml +
+          '<div class="major-detail-body" id="' + detailId + '-body" style="display:none"></div>' +
+        '</div>' +
+      '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function toggleSchoolRow(rowId, detailId) {
+  const detail = document.getElementById(detailId);
+  const expandBtn = document.getElementById(rowId + '-expand');
+  const row = document.getElementById(rowId);
+  if (detail.classList.contains('show')) {
+    detail.classList.remove('show');
+    expandBtn.classList.remove('open');
+    row.classList.remove('expanded');
+  } else {
+    detail.classList.add('show');
+    expandBtn.classList.add('open');
+    row.classList.add('expanded');
+  }
+}
+
+async function showMajorDetail(e, detailId, majorName, schoolName) {
+  e.stopPropagation();
+  const body = document.getElementById(detailId + '-body');
+  const items = document.querySelectorAll('#' + detailId + ' .major-item');
+  items.forEach(item => item.classList.remove('selected'));
+  e.target.classList.add('selected');
+
+  // 尝试从后端获取专业详情
+  try {
+    const params = new URLSearchParams({ target: 'major', major: majorName, school: schoolName, page: 1, page_size: 1 });
+    const r = await fetch('/api/query-meta?' + params);
+    const d = await r.json();
+    if (d.results && d.results.length > 0) {
+      const m = d.results[0];
+      const gr = m.major_gender_ratio || {};
+      const ratioStr = '男 ' + (gr.male || '-') + '% / 女 ' + (gr.female || '-') + '%';
+      body.innerHTML =
+        '<h4>📖 ' + m.major_name + '</h4>' +
+        '<p><strong>专业类别：</strong>' + (m.major_category || '-') + '</p>' +
+        '<p><strong>选科建议：</strong>' + (m.major_subject_suggest || '-') + '</p>' +
+        '<p><strong>就业率：</strong>' + (m.major_employment || '-') + '</p>' +
+        '<p><strong>男女比：</strong>' + ratioStr + '</p>' +
+        '<p style="margin-top:8px"><strong>专业简介：</strong>' + (m.major_desc || '暂无简介').substring(0, 300) + '</p>' +
+        '<p><strong>主要课程：</strong>' + (m.major_courses || '暂无').substring(0, 300) + '</p>' +
+        '<p><strong>就业方向：</strong>' + (m.major_career || '暂无').substring(0, 300) + '</p>';
+      body.style.display = 'block';
+      return;
+    }
+  } catch(e) {}
+  body.innerHTML = '<p style="color:#999">暂无该专业的详细数据</p>';
+  body.style.display = 'block';
+}
+
+function renderMajorTable(results, page, pageSize) {
+  const tbody = document.getElementById('majorTableBody');
+  if (!results.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:#999">未找到匹配的专业</td></tr>';
+    return;
+  }
+  tbody.innerHTML = results.map((item, i) => {
+    const gr = item.major_gender_ratio || {};
+    const ratioStr = '男' + (gr.male || '-') + '% / 女' + (gr.female || '-') + '%';
+    return '<tr>' +
+      '<td>' + ((page - 1) * pageSize + i + 1) + '</td>' +
+      '<td><strong>' + item.school + '</strong></td>' +
+      '<td>' + (item.province || '-') + '</td>' +
+      '<td>' + levelBadgeHtml(item.level) + '</td>' +
+      '<td>' + (item.nature || '-') + '</td>' +
+      '<td style="color:#0f3460;font-weight:500">' + item.major_name + '</td>' +
+      '<td>' + (item.major_subject_suggest || '-') + '</td>' +
+      '<td>' + (item.major_employment || '-') + '</td>' +
+      '<td><button class="chip-btn" style="padding:3px 8px;font-size:11px" onclick="showMajorPopup(\'' + item.major_name + '\', \'' + item.school + '\')">查看</button></td>' +
+      '</tr>';
+  }).join('');
+}
+
+function showMajorPopup(majorName, schoolName) {
+  // 获取详情并显示
+  fetch('/api/query-meta?target=major&major=' + encodeURIComponent(majorName) + '&school=' + encodeURIComponent(schoolName) + '&page=1&page_size=1')
+    .then(r => r.json())
+    .then(d => {
+      if (d.results && d.results.length > 0) {
+        const m = d.results[0];
+        const msg = '📖 ' + m.major_name + ' (' + m.school + ')\n\n' +
+          '专业类别: ' + (m.major_category || '-') + '\n' +
+          '选科建议: ' + (m.major_subject_suggest || '-') + '\n' +
+          '就业率: ' + (m.major_employment || '-') + '\n' +
+          '简介: ' + (m.major_desc || '-').substring(0, 500) + '\n\n' +
+          '主要课程: ' + (m.major_courses || '-').substring(0, 500) + '\n\n' +
+          '就业方向: ' + (m.major_career || '-').substring(0, 500);
+        alert(msg);
+      }
+    });
+}
+
+function renderPagination(d) {
+  const pg = document.getElementById('queryPagination');
+  if (d.total_pages <= 1) {
+    pg.innerHTML = '';
+    return;
+  }
+  let html = '';
+  html += '<button class="page-btn" ' + (d.page <= 1 ? 'disabled' : '') + ' onclick="goPage(' + (d.page - 1) + ')">◀</button>';
+
+  // 显示页码（最多7个）
+  const tp = d.total_pages;
+  let startP = Math.max(1, d.page - 3);
+  let endP = Math.min(tp, d.page + 3);
+  if (endP - startP < 6) {
+    if (startP === 1) endP = Math.min(tp, startP + 6);
+    else startP = Math.max(1, endP - 6);
+  }
+
+  if (startP > 1) html += '<span class="page-info">...</span>';
+  for (let p = startP; p <= endP; p++) {
+    html += '<button class="page-btn' + (p === d.page ? ' active' : '') + '" onclick="goPage(' + p + ')">' + p + '</button>';
+  }
+  if (endP < tp) html += '<span class="page-info">...</span>';
+
+  html += '<button class="page-btn" ' + (d.page >= tp ? 'disabled' : '') + ' onclick="goPage(' + (d.page + 1) + ')">▶</button>';
+  html += '<span class="page-info">共 ' + tp + ' 页 / ' + d.total + ' 条</span>';
+  pg.innerHTML = html;
+}
+
+async function goPage(p) {
+  queryPage = p;
+  document.getElementById('queryLoading').classList.add('show');
+  document.getElementById('queryResultBox').classList.remove('show');
+  document.getElementById('queryErrorMsg').classList.remove('show');
+
+  const school = document.getElementById('qSchool').value.trim();
+  const major = document.getElementById('qMajor').value.trim();
+  const province = document.getElementById('qProvince').value;
+  const degree = document.getElementById('qDegree').value;
+
+  const params = new URLSearchParams({
+    target: queryTarget,
+    page: queryPage,
+    page_size: queryPageSize,
+  });
+  if (school) params.set('school', school);
+  if (major) params.set('major', major);
+  if (province !== '全部') params.set('province', province);
+  if (queryFilters.level && queryFilters.level !== '全部') params.set('level', queryFilters.level);
+  if (queryFilters.nature && queryFilters.nature !== '全部') params.set('nature', queryFilters.nature);
+  if (degree !== '全部') params.set('degree', degree);
+
+  try {
+    const r = await fetch('/api/query-meta?' + params);
+    const d = await r.json();
+    renderQueryResults(d);
+    document.getElementById('queryResultBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch(e) {
+    document.getElementById('queryErrorMsg').textContent = '翻页失败：' + e.message;
+    document.getElementById('queryErrorMsg').classList.add('show');
+  }
+  document.getElementById('queryLoading').classList.remove('show');
+}
+
+// Enter 键支持
+['qSchool', 'qMajor'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') doQueryMeta();
+  });
+});
 
 init();
 </script>

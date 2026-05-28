@@ -23,6 +23,11 @@ TOTAL_COUNTS = {}
 SCHOOL_PROVINCE = {}  # school → province
 MAJOR_CATEGORY = {}   # (school, major) → category string
 
+# ========== 查询系统数据 ==========
+SCHOOL_META = {}     # school_name → metadata
+MAJOR_DETAILS = {}   # major_name → details
+SCHOOL_MAJORS = {}   # school → set of major names
+
 CAT_MAP = {
     '理科': 'physics', '物理': 'physics', '物理类': 'physics',
     '文科': 'history', '历史': 'history', '历史类': 'history',
@@ -348,74 +353,128 @@ def _load_data():
     print("加载数据中...")
 
     # 1. 标准化排位分
-    fp = os.path.join(PROCESSED_DIR, 'standardized_scores.json')
-    with open(fp, 'r', encoding='utf-8') as f:
-        for r in json.load(f)['data']:
-            STANDARDIZED[(r['year'], r['category'], r['score'])] = r
-    print(f"  标准化排位分: {len(STANDARDIZED)} 条")
+    try:
+        fp = os.path.join(PROCESSED_DIR, 'standardized_scores.json')
+        with open(fp, 'r', encoding='utf-8') as f:
+            for r in json.load(f)['data']:
+                STANDARDIZED[(r['year'], r['category'], r['score'])] = r
+        print(f"  标准化排位分: {len(STANDARDIZED)} 条")
+    except Exception as e:
+        print(f"  [错误] 标准化排位分加载失败: {e}")
 
     # 2. 专业标准化（历年）- 按专业合并区间
-    fp = os.path.join(PROCESSED_DIR, 'major_standards.json')
-    with open(fp, 'r', encoding='utf-8') as f:
-        major_data = json.load(f)['data']
-    # 按 (year, school, major) 索引
-    for r in major_data:
-        key = (r['year'], r['school'], r['major'])
-        if key not in MAJOR_STD:
-            MAJOR_STD[key] = r
-        else:
-            # 合并区间（取更宽范围）
-            old = MAJOR_STD[key]
-            MAJOR_STD[key] = {
-                'year': r['year'],
-                'school': r['school'],
-                'major': r['major'],
-                'low_std': min(old['low_std'], r['low_std']),
-                'high_std': max(old['high_std'], r['high_std']),
-                'low_rank': min(old['low_rank'], r['low_rank']),
-                'high_rank': max(old['high_rank'], r['high_rank']),
-            }
-    print(f"  专业标准化: {len(MAJOR_STD)} 条")
+    try:
+        fp = os.path.join(PROCESSED_DIR, 'major_standards.json')
+        with open(fp, 'r', encoding='utf-8') as f:
+            major_data = json.load(f)['data']
+        # 按 (year, school, major) 索引
+        for r in major_data:
+            key = (r['year'], r['school'], r['major'])
+            if key not in MAJOR_STD:
+                MAJOR_STD[key] = r
+            else:
+                # 合并区间（取更宽范围）
+                old = MAJOR_STD[key]
+                MAJOR_STD[key] = {
+                    'year': r['year'],
+                    'school': r['school'],
+                    'major': r['major'],
+                    'low_std': min(old['low_std'], r['low_std']),
+                    'high_std': max(old['high_std'], r['high_std']),
+                    'low_rank': min(old['low_rank'], r['low_rank']),
+                    'high_rank': max(old['high_rank'], r['high_rank']),
+                }
+        print(f"  专业标准化: {len(MAJOR_STD)} 条")
+    except Exception as e:
+        print(f"  [错误] 专业标准化数据加载失败: {e}")
 
     # 3. 学校标准化
-    fp = os.path.join(PROCESSED_DIR, 'school_standards.json')
-    with open(fp, 'r', encoding='utf-8') as f:
-        for r in json.load(f)['data']:
-            SCHOOL_STD[(r['year'], r['school'], r.get('category', 'physics'))] = r
-    print(f"  学校标准化: {len(SCHOOL_STD)} 条")
+    try:
+        fp = os.path.join(PROCESSED_DIR, 'school_standards.json')
+        with open(fp, 'r', encoding='utf-8') as f:
+            for r in json.load(f)['data']:
+                SCHOOL_STD[(r['year'], r['school'], r.get('category', 'physics'))] = r
+        print(f"  学校标准化: {len(SCHOOL_STD)} 条")
+    except Exception as e:
+        print(f"  [错误] 学校标准化数据加载失败: {e}")
 
     # 4. 专业组标准化
-    fp = os.path.join(PROCESSED_DIR, 'group_standards.json')
-    with open(fp, 'r', encoding='utf-8') as f:
-        for r in json.load(f)['data']:
-            GROUP_STD[(r['school'], r['group_code'], r['category'])] = r
-    print(f"  专业组标准化: {len(GROUP_STD)} 条")
+    try:
+        fp = os.path.join(PROCESSED_DIR, 'group_standards.json')
+        with open(fp, 'r', encoding='utf-8') as f:
+            for r in json.load(f)['data']:
+                GROUP_STD[(r['school'], r['group_code'], r['category'])] = r
+        print(f"  专业组标准化: {len(GROUP_STD)} 条")
+    except Exception as e:
+        print(f"  [错误] 专业组标准化数据加载失败: {e}")
 
     # 5. 专业组专业列表
-    fp = os.path.join(PROCESSED_DIR, 'group_majors.json')
-    with open(fp, 'r', encoding='utf-8') as f:
-        for g in json.load(f)['data']:
-            GROUP_MAJORS[(g['school'], g['group_code'], g['category'])] = g['majors']
-    print(f"  专业组结构: {len(GROUP_MAJORS)} 组")
+    try:
+        fp = os.path.join(PROCESSED_DIR, 'group_majors.json')
+        with open(fp, 'r', encoding='utf-8') as f:
+            for g in json.load(f)['data']:
+                GROUP_MAJORS[(g['school'], g['group_code'], g['category'])] = g['majors']
+        print(f"  专业组结构: {len(GROUP_MAJORS)} 组")
+    except Exception as e:
+        print(f"  [错误] 专业组列表数据加载失败: {e}")
 
     # 6. 总人数
-    fp = os.path.join(PROCESSED_DIR, 'total_counts.json')
-    with open(fp, 'r', encoding='utf-8') as f:
-        for ys, cats in json.load(f).items():
-            for c, cnt in cats.items():
-                TOTAL_COUNTS[(int(ys), c)] = cnt
+    try:
+        fp = os.path.join(PROCESSED_DIR, 'total_counts.json')
+        with open(fp, 'r', encoding='utf-8') as f:
+            for ys, cats in json.load(f).items():
+                for c, cnt in cats.items():
+                    TOTAL_COUNTS[(int(ys), c)] = cnt
+    except Exception as e:
+        print(f"  [错误] 总人数数据加载失败: {e}")
 
     # 7. 构建学校→省份映射 & 专业→类别映射
+    global SCHOOL_META, MAJOR_DETAILS, SCHOOL_MAJORS
+
+    # 7a. 加载院校元数据
+    try:
+        fp_meta = os.path.join(PROJECT_DIR, 'docs', 'school_metadata.json')
+        with open(fp_meta, 'r', encoding='utf-8') as f:
+            raw_meta = json.load(f)
+        schools_data = raw_meta.get('schools', {})
+        for school_name, meta in schools_data.items():
+            if isinstance(meta, dict) and 'level' in meta:
+                SCHOOL_META[school_name] = meta
+        print(f"  院校元数据: {len(SCHOOL_META)} 所")
+    except Exception as e:
+        print(f"  [错误] 院校元数据加载失败: {e}")
+
+    # 7b. 加载专业详情
+    try:
+        fp_maj = os.path.join(PROJECT_DIR, 'docs', 'major_details.json')
+        with open(fp_maj, 'r', encoding='utf-8') as f:
+            raw_majors = json.load(f)
+        if 'majors' in raw_majors:
+            MAJOR_DETAILS = raw_majors['majors']
+        print(f"  专业详情: {len(MAJOR_DETAILS)} 个")
+    except Exception as e:
+        print(f"  [错误] 专业详情数据加载失败: {e}")
+
+    # 7c. 构建学校映射
     all_schools = set()
     for (_, school, major) in MAJOR_STD:
         all_schools.add(school)
         if (school, major) not in MAJOR_CATEGORY:
             MAJOR_CATEGORY[(school, major)] = _detect_major_category(major)
+        if school not in SCHOOL_MAJORS:
+            SCHOOL_MAJORS[school] = set()
+        SCHOOL_MAJORS[school].add(major)
     for (school, _, _) in GROUP_STD:
         all_schools.add(school)
 
     for s in all_schools:
         SCHOOL_PROVINCE[s] = _detect_province(s)
+    # 把来自 school_metadata 的院校也补上省份映射
+    for s in SCHOOL_META:
+        if s not in SCHOOL_PROVINCE:
+            SCHOOL_PROVINCE[s] = SCHOOL_META[s].get('province', '其他')
+        if s not in SCHOOL_MAJORS:
+            SCHOOL_MAJORS[s] = set()
 
     prov_count = defaultdict(int)
     for s, p in SCHOOL_PROVINCE.items():
@@ -423,6 +482,36 @@ def _load_data():
     print(f"  省份覆盖: {len(prov_count)} 个")
     for p, c in sorted(prov_count.items(), key=lambda x: -x[1]):
         print(f"    {p}: {c} 所学校")
+    print(f"  学校-专业映射: {len(SCHOOL_MAJORS)} 所学校有专业数据")
+
+    # 8. 加载985学院-专业树
+    global _985_DATA, _985_DATA_PATH
+    _985_DATA_PATH = os.path.join(PROJECT_DIR, 'data_985', '985_schools_final.json')
+    _985_DATA = {}
+    try:
+        if os.path.exists(_985_DATA_PATH):
+            with open(_985_DATA_PATH, 'r', encoding='utf-8') as f:
+                _985_DATA = json.load(f)
+            print(f'  985学院-专业树: {_985_DATA.get("meta",{}).get("total_main_985_schools","?")} 所学校')
+        else:
+            print('  985学院-专业树: 文件不存在')
+    except Exception as e:
+        print(f'  985学院-专业树加载失败: {e}')
+
+    # 9. 加载批次线
+    global _BATCH_LINES
+    _BATCH_LINES = []
+    try:
+        bl_path = os.path.join(PROJECT_DIR, 'docs', 'batch_lines.json')
+        if os.path.exists(bl_path):
+            with open(bl_path, 'r', encoding='utf-8') as f:
+                bl_data = json.load(f)
+                _BATCH_LINES = bl_data.get('data', [])
+            print(f'  批次线: {len(_BATCH_LINES)} 条')
+        else:
+            print('  批次线: 文件不存在')
+    except Exception as e:
+        print(f'  批次线加载失败: {e}')
 
     print("数据加载完成 ✅")
 
@@ -508,6 +597,12 @@ async def list_subject_requirements():
 
 @app.get("/api/query")
 async def query_score(score: int = Query(...), year: int = Query(...), category: str = Query(...)):
+    # 分数范围校验
+    if score < 0 or score > 750:
+        raise HTTPException(status_code=400, detail=f"分数必须在 0-750 之间，收到: {score}")
+    # 年份范围校验
+    if year < 2017 or year > 2025:
+        raise HTTPException(status_code=400, detail=f"年份必须在 2017-2025 之间，收到: {year}")
     cat = _norm_cat(category)
     key = (year, cat, score)
     if key not in STANDARDIZED:
@@ -537,6 +632,12 @@ async def query_score(score: int = Query(...), year: int = Query(...), category:
     }
 
 
+@app.get("/api/985-schools")
+async def get_985_schools():
+    """获取985学校的学院-专业树"""
+    return _985_DATA
+
+
 # ========== 推荐 API（核心）==========
 
 @app.get("/api/recommend")
@@ -551,6 +652,12 @@ async def recommend(
     tag_filter: str = Query(None, description="专业标签筛选"),
 ):
     cat = _norm_cat(category)
+    # 分数范围校验
+    if score < 0 or score > 750:
+        raise HTTPException(status_code=400, detail=f"分数必须在 0-750 之间，收到: {score}")
+    # 年份范围校验
+    if year < 2017 or year > 2025:
+        raise HTTPException(status_code=400, detail=f"年份必须在 2017-2025 之间，收到: {year}")
     sk = (year, cat, score)
     if sk not in STANDARDIZED:
         raise HTTPException(status_code=404, detail="未找到该分数数据")
@@ -722,7 +829,32 @@ async def recommend(
 
     for rec in deduped:
         rec["advice"] = guidance.get("advice", "名师建议：根据分数段合理选择")
-    return {
+
+    # 批次线资格校验：提醒用户是否低于本科线
+    warning = None
+    batch_cat_map = {
+        'physics': '物理类' if year >= 2025 else '理科',
+        'history': '历史类' if year >= 2025 else '文科',
+    }
+    batch_cat = batch_cat_map.get(cat, None)
+    if batch_cat and _BATCH_LINES:
+        undergrad_scores = []
+        for bl in _BATCH_LINES:
+            if bl.get('year') != year:
+                continue
+            if bl.get('category') != batch_cat:
+                continue
+            if province and province != '全部' and bl.get('province') != province:
+                continue
+            if '本科' in bl.get('batch', ''):
+                undergrad_scores.append(bl['score'])
+        if undergrad_scores:
+            min_ug_line = min(undergrad_scores)
+            if score < min_ug_line:
+                batch_name = '本科批' if year >= 2025 else '本科线'
+                warning = f'⚠️ 你的分数({score}分)低于{year}年{batch_cat}{batch_name}分数线({min_ug_line}分)，可能无法被本科院校录取，建议同时关注专科志愿'
+
+    result = {
         'query': {'score': score, 'year': year, 'category': category, 'province': province,
                    'major_category': major_category, 'subject_req': subject_req},
         'student_range': {'low': s_low, 'high': s_high},
@@ -737,6 +869,9 @@ async def recommend(
         'guidance': guidance,
         'recommendations': deduped,
     }
+    if warning:
+        result['warning'] = warning
+    return result
 
 
 # ========== 详情 API ==========
@@ -814,7 +949,14 @@ async def download_file(filename: str):
 
 # ========== 艺术体育类 API ==========
 
-from art_sport import ART_CATEGORIES, get_recommendations
+try:
+    from art_sport import ART_CATEGORIES, get_recommendations
+except Exception as e:
+    print(f'[WARN] art_sport 模块加载失败: {e}，艺体推荐功能将不可用')
+    ART_CATEGORIES = []
+
+    def get_recommendations(*args, **kwargs):
+        return []
 
 
 @app.get("/api/tag-filters")
@@ -841,12 +983,13 @@ async def list_strategies():
     }
 
 
-@app.get("/api/art-categories")
 @app.get("/api/tag-descriptions")
 async def list_tag_descriptions():
     """返回专业标签详细说明字典"""
     return {'descriptions': TAG_DESCRIPTIONS}
 
+
+@app.get("/api/art-categories")
 async def list_art_categories():
     """返回艺术体育类别列表"""
     return {'categories': ART_CATEGORIES}
@@ -864,6 +1007,139 @@ async def art_recommend(
         'query': {'culture': culture, 'major': major, 'category': category},
         'total': len(recs),
         'recommendations': recs,
+    }
+
+
+# ========== 查询系统 API ==========
+
+@app.get("/api/query-meta")
+async def query_meta(
+    school: str = Query(None, description="院校名称模糊搜索"),
+    major: str = Query(None, description="专业名称模糊搜索"),
+    province: str = Query(None, description="省份筛选"),
+    level: str = Query(None, description="层次筛选：985/211/双一流/国重点/省重点/普通"),
+    nature: str = Query(None, description="性质筛选：公办/民办/中外合作办学"),
+    degree: str = Query(None, description="学位层次：本科/专科"),
+    target: str = Query('school', description="查询目标：school=院校, major=专业"),
+    page: int = Query(1, ge=1, description="页码"),
+    page_size: int = Query(50, ge=1, le=200, description="每页数量"),
+):
+    """多维度筛选院校和专业"""
+    results = []
+
+    for school_name, meta in SCHOOL_META.items():
+        sp = meta.get('province', '')
+        sl = meta.get('level', '')
+        sn = meta.get('nature', '')
+        sd = meta.get('degree', '')
+
+        # 筛选：省份
+        if province and province != '全部' and province != sp:
+            continue
+
+        # 筛选：层次
+        if level and level != '全部' and level != sl:
+            continue
+
+        # 筛选：性质
+        if nature and nature != '全部' and nature != sn:
+            continue
+
+        # 筛选：学位
+        if degree and degree != '全部' and degree != sd:
+            continue
+
+        # 筛选：院校名称模糊匹配
+        if school and school not in school_name:
+            continue
+
+        # 获取该学校的专业
+        school_major_list = sorted(SCHOOL_MAJORS.get(school_name, set()))
+
+        # 筛选：专业名称模糊匹配
+        if major and target == 'school':
+            # 院校模式下，只有学校包含匹配专业才加入结果
+            if not any(major in m for m in school_major_list) and len(school_major_list) == 0:
+                continue
+        elif major and target == 'major':
+            # 专业模式下，筛选匹配的专业
+            school_major_list = [m for m in school_major_list if major in m]
+            # 也从 MAJOR_DETAILS 中搜索
+            extra_majors = [m for m in MAJOR_DETAILS if major in m and m not in school_major_list]
+            school_major_list = school_major_list + extra_majors
+            # 跳过无匹配专业的院校（除非用户指定了该院校名）
+            if not school_major_list:
+                if not school or school not in school_name:
+                    continue
+
+        if target == 'major':
+            # 专业视图：每个匹配的专业作为一行
+            for m_name in school_major_list[:20]:  # 限制每校最多20个专业
+                m_detail = MAJOR_DETAILS.get(m_name, {})
+                emp = m_detail.get('employment_rate', [])
+                latest_rate = ''
+                if emp:
+                    latest = sorted(emp, key=lambda x: x.get('year', 0), reverse=True)
+                    latest_rate = latest[0].get('rate', '') if latest else ''
+                results.append({
+                    'school': school_name,
+                    'province': sp,
+                    'level': sl,
+                    'level_detail': meta.get('level_detail', ''),
+                    'nature': sn,
+                    'type': meta.get('type', ''),
+                    'degree': sd,
+                    'is_985': meta.get('is_985', False),
+                    'is_211': meta.get('is_211', False),
+                    'is_shuangyiliu': meta.get('is_shuangyiliu', False),
+                    'major_name': m_name,
+                    'major_desc': m_detail.get('description', ''),
+                    'major_courses': m_detail.get('courses', ''),
+                    'major_career': m_detail.get('career', ''),
+                    'major_employment': latest_rate,
+                    'major_gender_ratio': m_detail.get('gender_ratio', {}),
+                    'major_subject_suggest': m_detail.get('subject_suggest', ''),
+                    'major_category': m_detail.get('category', ''),
+                })
+        else:
+            # 院校视图：按学校聚合
+            major_names = sorted(SCHOOL_MAJORS.get(school_name, set()))
+            results.append({
+                'school': school_name,
+                'province': sp,
+                'level': sl,
+                'level_detail': meta.get('level_detail', ''),
+                'nature': sn,
+                'type': meta.get('type', ''),
+                'degree': sd,
+                'is_985': meta.get('is_985', False),
+                'is_211': meta.get('is_211', False),
+                'is_shuangyiliu': meta.get('is_shuangyiliu', False),
+                'majors_count': len(major_names),
+                'majors': major_names[:50],  # 最多展示50个
+            })
+
+    # 排序：985 > 211 > 双一流 > 国重点 > 省重点 > 普通
+    level_order = {'985': 0, '211': 1, '双一流': 2, '国重点': 3, '省重点': 4, '普通': 5}
+    results.sort(key=lambda x: level_order.get(x.get('level', '普通'), 99))
+
+    total = len(results)
+    start = (page - 1) * page_size
+    end = start + page_size
+    paged = results[start:end]
+
+    return {
+        'total': total,
+        'page': page,
+        'page_size': page_size,
+        'total_pages': math.ceil(total / page_size) if total > 0 else 0,
+        'results': paged,
+        'filters': {
+            'provinces': sorted(set(m.get('province', '') for m in SCHOOL_META.values() if m.get('province'))),
+            'levels': ['985', '211', '双一流', '国重点', '省重点', '普通'],
+            'natures': ['公办', '民办', '中外合作办学'],
+            'degrees': ['本科', '专科'],
+        },
     }
 
 
