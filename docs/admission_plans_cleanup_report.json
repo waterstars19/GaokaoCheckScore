@@ -1,0 +1,103 @@
+{
+  "task": "merge_duplicate_records",
+  "timestamp": "2026-05-28T08:48:18.921Z",
+  "before_count": 370313,
+  "after_count": 364901,
+  "duplicate_groups_found": 4063,
+  "duplicates_removed": 5412,
+  "merge_keys": [
+    "year",
+    "province",
+    "category",
+    "school",
+    "school_code",
+    "major",
+    "batch",
+    "data_type"
+  ],
+  "still_duplicate_after_merge": 0,
+  "zzu_clinical_before": 21,
+  "zzu_clinical_after": 9,
+  "zzu_clinical_by_year_before": {
+    "2017": 1,
+    "2018": 1,
+    "2020": 1,
+    "2021": 1,
+    "2022": 1,
+    "2023": 3,
+    "2024": 6,
+    "2025": 7
+  },
+  "zzu_clinical_by_year_after": {
+    "2017": 1,
+    "2018": 1,
+    "2020": 1,
+    "2021": 1,
+    "2022": 1,
+    "2023": 1,
+    "2024": 2,
+    "2025": 1
+  },
+  "sample_merged_groups": [
+    {
+      "key": "2017|||河南|||物理类|||兰州大学|||10730|||应用化学（核科学与技术基地班|||一本|||enrollment_plan",
+      "count": 2,
+      "school": "兰州大学",
+      "major": "应用化学（核科学与技术基地班"
+    },
+    {
+      "key": "2017|||河南|||物理类|||兰州大学|||10730|||应用物理学（核科学与技术基地班|||一本|||enrollment_plan",
+      "count": 2,
+      "school": "兰州大学",
+      "major": "应用物理学（核科学与技术基地班"
+    },
+    {
+      "key": "2017|||河南|||物理类|||北京化工大学|||10010|||机械类（中外合作办学|||一本|||enrollment_plan",
+      "count": 2,
+      "school": "北京化工大学",
+      "major": "机械类（中外合作办学"
+    },
+    {
+      "key": "2017|||河南|||物理类|||南京大学|||10284|||理科试验班|||一本|||enrollment_plan",
+      "count": 2,
+      "school": "南京大学",
+      "major": "理科试验班"
+    },
+    {
+      "key": "2017|||河南|||物理类|||南方医科大学|||12121|||生物医学工程|||一本|||enrollment_plan",
+      "count": 2,
+      "school": "南方医科大学",
+      "major": "生物医学工程"
+    },
+    {
+      "key": "2017|||河南|||历史类|||武汉工程大学|||10490|||法学|||一本|||enrollment_plan",
+      "count": 2,
+      "school": "武汉工程大学",
+      "major": "法学"
+    },
+    {
+      "key": "2017|||河南|||物理类|||河南水利与环境职业学院|||12582|||建筑工程技术|||专科|||enrollment_plan",
+      "count": 2,
+      "school": "河南水利与环境职业学院",
+      "major": "建筑工程技术"
+    },
+    {
+      "key": "2019|||河南|||物理类|||山东外事职业大学|||13874|||会计|||专科|||enrollment_plan",
+      "count": 2,
+      "school": "山东外事职业大学",
+      "major": "会计"
+    },
+    {
+      "key": "2019|||河南|||物理类|||山东外事职业大学|||13874|||商务英语|||专科|||enrollment_plan",
+      "count": 2,
+      "school": "山东外事职业大学",
+      "major": "商务英语"
+    },
+    {
+      "key": "2019|||河南|||物理类|||山东外事职业大学|||13874|||市场营销|||专科|||enrollment_plan",
+      "count": 2,
+      "school": "山东外事职业大学",
+      "major": "市场营销"
+    }
+  ]
+}
