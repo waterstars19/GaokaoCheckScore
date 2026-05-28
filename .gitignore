@@ -43,3 +43,5 @@ _*.png
 # 系统
 .DS_Store
 Thumbs.db
+
+admission_plans.json
